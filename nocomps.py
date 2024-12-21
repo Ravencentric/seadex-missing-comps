@@ -35,7 +35,6 @@ def get_entries() -> tuple[Entry, ...]:
         AniList() as anilist,
     ):
         entries: list[tuple[Media, str]] = []
-        count = 0
 
         for entry in seadex_entry.iterator():
             if not any(
@@ -45,10 +44,6 @@ def get_entries() -> tuple[Entry, ...]:
                 entries.append((media, entry.url))
                 print(f"Found: {media.title} - {entry.url}")
                 sleep(2)  # Avoid AniList rate limit
-                if count ==5:
-                    break
-                else:
-                    count += 1
 
         entries.sort(
             reverse=True,
@@ -63,7 +58,7 @@ def get_entries() -> tuple[Entry, ...]:
                     score=media.average_score,
                     seadex=url,
                     anilist=str(media.site_url),
-                )
+                ),
             )
 
     return tuple(results)
