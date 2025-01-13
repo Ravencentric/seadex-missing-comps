@@ -1,65 +1,92 @@
 # /// script
-# requires-python = ">=3.11"
+# requires-python = ">=3.12"
 # dependencies = [
-#     "pyanilist==0.6.1",
 #     "seadex==0.4.0",
 #     "prettytable==3.12.0",
+#     "httpx>=0.28.1",
+#     "pydantic>=2.10.5",
 # ]
 # ///
 
 
 import argparse
-from dataclasses import dataclass
-from time import sleep
+from itertools import batched
 
+import httpx
 from prettytable import PrettyTable, TableStyle
-from pyanilist import AniList, Media
-from seadex import SeaDexEntry
+from pydantic import BaseModel
+from seadex import EntryRecord, SeaDexEntry
+
+URL = "https://graphql.anilist.co"
+
+QUERY = """\
+query Media($idIn: [Int]) {
+  Page {
+    media(id_in: $idIn) {
+      id
+      title {
+        romaji
+        english
+      }
+      startDate {
+        year
+      }
+      averageScore
+      popularity
+    }
+  }
+}
+"""
 
 
-@dataclass
-class Entry:
+class Entry(BaseModel):
     title: str
     year: int | None
     score: int | None
+    popularity: int | None
     seadex: str
     anilist: str
 
 
-def get_entries() -> tuple[Entry, ...]:
-    """Get SeaDex entries with missing comparisons sorted by popularity."""
+def get_entries_with_no_comps() -> tuple[Entry, ...]:
+    """Get SeaDex entries with missing comparisons"""
     results: list[Entry] = []
 
-    with (
-        SeaDexEntry() as seadex_entry,
-        AniList() as anilist,
-    ):
-        entries: list[tuple[Media, str]] = []
+    with SeaDexEntry() as seadex_entry:
+        entries: list[EntryRecord] = []
 
         for entry in seadex_entry.iterator():
             if not any(
                 comp.startswith("https://slow.pics") for comp in entry.comparisons
             ):
-                media = anilist.get_media(id=entry.anilist_id)
-                entries.append((media, entry.url))
-                print(f"Found: {media.title} - {entry.url}")
-                sleep(2)  # Avoid AniList rate limit
+                entries.append(entry)
 
-        entries.sort(
-            reverse=True,
-            key=lambda x: x[0].popularity if x[0].popularity is not None else -1,
-        )
+    with httpx.Client() as client:
+        for batch in batched(entries, 50):
+            resp = client.post(
+                URL,
+                json={
+                    "query": QUERY,
+                    "variables": {"idIn": [entry.anilist_id for entry in batch]},
+                },
+            ).raise_for_status().json()["data"]["Page"]["media"]
 
-        for media, url in entries:
-            results.append(
-                Entry(
-                    title=str(media.title),
-                    year=media.start_date.year,
-                    score=media.average_score,
-                    seadex=url,
-                    anilist=str(media.site_url),
-                ),
-            )
+            for media in resp:
+                results.append(
+                    Entry(
+                        title=media["title"]["english"] or media["title"]["romaji"],
+                        year=media["startDate"]["year"],
+                        score=media["averageScore"],
+                        popularity=media["popularity"],
+                        seadex=f"https://releases.moe/{media['id']}/",
+                        anilist=f"https://anilist.co/anime/{media['id']}",
+                    ),
+                )
+
+    results.sort(
+        reverse=True,
+        key=lambda x: x.popularity if x.popularity is not None else -1,
+    )
 
     return tuple(results)
 
@@ -97,7 +124,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    data = get_entries()
+    data = get_entries_with_no_comps()
 
     with open(args.output, "w", encoding="utf-8") as f:
         f.write("## SeaDex entries with missing comparisons\n")
