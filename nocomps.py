@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
-#     "seadex==0.4.0",
+#     "seadex==0.5.0",
 #     "prettytable==3.12.0",
 #     "httpx>=0.28.1",
 #     "pydantic>=2.10.5",

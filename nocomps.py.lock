@@ -6,7 +6,7 @@ requirements = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "prettytable", specifier = "==3.12.0" },
     { name = "pydantic", specifier = ">=2.10.5" },
-    { name = "seadex", specifier = "==0.4.0" },
+    { name = "seadex", specifier = "==0.5.0" },
 ]
 
 [[package]]
@@ -169,7 +169,7 @@ wheels = [
 
 [[package]]
 name = "seadex"
-version = "0.4.0"
+version = "0.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -179,9 +179,9 @@ dependencies = [
     { name = "torf" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/87/4d/20f49b328829ef67665272db6eb14d22882cab8162841f34642d7c0b8dda/seadex-0.4.0.tar.gz", hash = "sha256:05e3155dfacc26abdb110853055528948a8aa349dec22436721e86130e4bafe8", size = 1204741 }
+sdist = { url = "https://files.pythonhosted.org/packages/76/3b/d6ae25ae1688f53480b45541f56a0017c2e5afe310d589df50f6f91223fa/seadex-0.5.0.tar.gz", hash = "sha256:c2c39c203df61acf81d7ecf921d5c7772d6b781be7344f33b90ac4339d191a68", size = 1204988 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/35/71/3b8665ddba7dbd5e8e38813e097abefb5c6a33b022b58485025118ad3bb1/seadex-0.4.0-py3-none-any.whl", hash = "sha256:503cb5cf07fbd728afb6d2ef050a663e7f8483cf4d1c0366fd5bf6aae5768ea1", size = 18604 },
+    { url = "https://files.pythonhosted.org/packages/5f/1e/5f9669d101ea1690f4fa70439bf6c86e2e0e93d406f555618b4524111ddf/seadex-0.5.0-py3-none-any.whl", hash = "sha256:f997847393420938c5591ddf84d4e92d536be8ec9e024e8b0a726ec5554d980d", size = 18666 },
 ]
 
 [[package]]
